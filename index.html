@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+<title>HuecosApp Soacha — Demo</title>
+<style>
+:root{
+  --primary:#6c4ad4;
+  --primary-dark:#5433a6;
+  --bg:#f6f7fb;
+  --card:#ffffff;
+  --muted:#9aa0b4;
+  --radius:16px;
+  --maxw:420px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  background:var(--bg);
+  color:#222;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* app viewport: centrado y mobile-first */
+.app {
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:18px 12px 40px;
+}
+
+/* contenedor con max-width para parecer app */
+.view {
+  width:100%;
+  max-width:var(--maxw);
+}
+
+/* header morado con curva inferior */
+.header {
+  width:100%;
+  max-width:var(--maxw);
+  background: linear-gradient(180deg,var(--primary),var(--primary));
+  color:#fff;
+  padding:18px 18px 26px;
+  border-bottom-left-radius:28px;
+  border-bottom-right-radius:28px;
+  box-shadow: 0 6px 20px rgba(108,74,212,0.12);
+  text-align:center;
+  font-weight:700;
+  font-size:20px;
+}
+
+/* título pequeño */
+.page-title {
+  text-align:center;
+  margin:14px 0 8px;
+  color:var(--primary);
+  font-weight:600;
+  letter-spacing:0.2px;
+}
+
+/* tarjeta */
+.card {
+  background:var(--card);
+  padding:14px;
+  border-radius:var(--radius);
+  box-shadow: 0 6px 18px rgba(25,25,50,0.06);
+  margin:8px 0 12px;
+  border: 1px solid rgba(16,16,36,0.03);
+}
+
+/* labels y campos */
+.label { display:block; font-size:13px; color:#444; margin-bottom:6px; font-weight:600; }
+.input, textarea, .input-file {
+  width:100%;
+  display:block;
+  padding:12px 12px;
+  border-radius:12px;
+  border:1px solid #e6e7ee;
+  font-size:14px;
+  background: #fbfbff;
+  outline:none;
+}
+textarea { min-height:88px; resize:vertical; }
+.input:focus, textarea:focus { box-shadow:0 6px 18px rgba(108,74,212,0.08); border-color:var(--primary); }
+
+/* fila para archivo y preview */
+.file-row{ display:flex; gap:10px; align-items:center; }
+.file-preview{ width:84px;height:64px;border-radius:10px;object-fit:cover;background:#f0f0f5;border:1px solid #eee; }
+
+/* gps row */
+.gps-row{ display:flex; gap:8px; align-items:center; margin-top:8px; }
+.btn-loc {
+  flex:1;
+  background:#fff;
+  border:1px solid #eee;
+  padding:10px;
+  border-radius:12px;
+  font-size:14px;
+  display:flex;
+  gap:8px;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.gps-text { font-size:13px; color:var(--muted); text-align:center; padding:6px 8px; }
+
+/* boton principal */
+.btn-main {
+  background: linear-gradient(90deg,var(--primary),var(--primary-dark));
+  color:white;
+  border:none;
+  padding:12px 14px;
+  width:100%;
+  border-radius:999px;
+  font-weight:700;
+  margin-top:10px;
+  cursor:pointer;
+  box-shadow: 0 8px 18px rgba(108,74,212,0.14);
+}
+.btn-main:active{ transform:translateY(1px)}
+
+/* links centrados */
+.link-center{ text-align:center; margin-top:6px; color:var(--muted); font-size:13px; display:block; text-decoration:none; }
+
+/* lista de reportes */
+.report-list{ display:flex; flex-direction:column; gap:10px; margin-top:8px; }
+.report-item{
+  background:linear-gradient(180deg,#fff,#fbfbff);
+  padding:10px;
+  border-radius:14px;
+  display:flex;
+  gap:10px;
+  align-items:flex-start;
+  border:1px solid #f0eff8;
+}
+.report-thumb{ width:84px;height:64px;border-radius:10px;object-fit:cover;background:#f2f2f7;border:1px solid #eee; flex-shrink:0; }
+.report-meta{ flex:1; }
+.report-date{ font-size:12px;color:var(--muted); margin-bottom:6px; }
+.report-desc{ font-size:14px; margin-bottom:8px; color:#222;}
+.report-gps{ font-size:12px;color:var(--muted); display:flex; gap:8px; align-items:center;}
+.badge {
+  display:inline-block;padding:6px 8px;border-radius:999px;font-size:12px;font-weight:700;
+}
+.badge.low{ background:#e8f7ea;color:#1a7f3a; }
+.badge.med{ background:#fff3db;color:#9a6b00; }
+.badge.high{ background:#fdecea;color:#b10b0b; }
+
+/* mapa simulado: ahora usa maps.png como fondo (fondo realista) */
+.map {
+  height:220px;
+  border-radius:12px;
+  background-color:#eef2ff;
+  border:1px solid #e8e9f8;
+  position:relative;
+  overflow:hidden;
+  padding:8px;
+  /* COLOCA maps.png en la misma carpeta del HTML */
+  background-image: linear-gradient(rgba(255,255,255,0.55), rgba(255,255,255,0.55)), url('maps.png');
+  background-size: cover;
+  background-position: center;
+}
+.map-dot{
+  position:absolute;width:14px;height:14px;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 4px 8px rgba(16,16,48,0.12);
+  border:2px solid rgba(255,255,255,0.7);
+}
+.map-dot.low{ background:#2ecc71; }
+.map-dot.med{ background:#f1c40f; }
+.map-dot.high{ background:#e74c3c; }
+
+/* nav inferior simple (simula pestañas) */
+.bottom-nav{
+  display:flex;
+  gap:8px;
+  justify-content:space-between;
+  margin-top:8px;
+}
+.tab{
+  flex:1;
+  padding:10px;
+  text-align:center;
+  border-radius:999px;
+  background:transparent;
+  color:var(--muted);
+  border:1px solid transparent;
+  cursor:pointer;
+  font-weight:700;
+}
+.tab.active{ background:linear-gradient(90deg,var(--primary),var(--primary-dark)); color:#fff; box-shadow:0 6px 18px rgba(108,74,212,0.12); }
+
+/* pantallas (secciones) */
+.screen{ display:none; }
+.screen.active{ display:block; }
+
+/* pantallas grandes */
+@media(min-width:800px){
+  body{ background:linear-gradient(180deg,#fafbff,#f6f7fb) }
+  .app{ padding:28px; }
+  .header{ padding:28px; font-size:22px; border-radius:12px; }
+  .view{ box-shadow: 0 20px 40px rgba(16,16,48,0.06); border-radius:18px; overflow:hidden }
+}
+</style>
+</head>
+<body class="app">
+  <div class="view" role="application" aria-label="HuecosApp">
+    <div class="header">HuecosApp Soacha</div>
+
+    <!-- NAV -->
+    <div style="padding:12px">
+      <div class="bottom-nav" role="tablist" aria-label="Navegación">
+        <button class="tab active" data-screen="reportar" aria-selected="true">Reportar</button>
+        <button class="tab" data-screen="mis">Mis reportes</button>
+        <button class="tab" data-screen="admin">Admin</button>
+      </div>
+
+      <!-- REPORTAR -->
+      <section id="reportar" class="screen active" aria-labelledby="titulo-reportar" style="margin-top:12px">
+        <div class="page-title" id="titulo-reportar">Nuevo Reporte</div>
+        <form id="formReporte" class="card" autocomplete="off">
+          <label class="label">Subir Foto</label>
+          <div class="file-row">
+            <!-- usa cam.png como placeholder: coloca cam.png en la misma carpeta -->
+            <img id="previewFoto" class="file-preview" alt="Preview foto" src="cam.png" />
+            <input id="foto" class="input-file input" type="file" accept="image/*" aria-label="Seleccionar foto">
+          </div>
+
+          <label class="label" style="margin-top:6px">Descripción</label>
+          <textarea id="descripcion" class="input" placeholder="Ej: Hueco profundo en la Carrera 7 con Calle 26"></textarea>
+
+          <label class="label" style="margin-top:6px">Ubicación GPS</label>
+          <div class="gps-row">
+            <button id="btnUbicacion" type="button" class="btn-loc" aria-label="Obtener ubicación">📍 Obtener Ubicación</button>
+          </div>
+          <div class="gps-text" id="gps" aria-live="polite"></div>
+
+          <button class="btn-main" type="submit">Enviar Reporte</button>
+        </form>
+
+        <a class="link-center" href="#" id="verMisReportes">📋 Ver mis reportes</a>
+      </section>
+
+      <!-- MIS REPORTES -->
+      <section id="mis" class="screen" aria-labelledby="titulo-mis" style="margin-top:12px">
+        <div class="page-title" id="titulo-mis">Mis reportes</div>
+        <div id="listaReportes" class="card"></div>
+        <a class="link-center" href="#" id="irReportar">➕ Nuevo reporte</a>
+      </section>
+
+      <!-- ADMIN -->
+      <section id="admin" class="screen" aria-labelledby="titulo-admin" style="margin-top:12px">
+        <div class="page-title" id="titulo-admin">Panel administrador</div>
+
+        <div class="card" style="margin-bottom:12px">
+          <strong style="display:block;margin-bottom:8px">Mapa de reportes</strong>
+          <div id="mapa" class="map" aria-hidden="false"></div>
+        </div>
+
+        <div id="todosReportes" class="card"></div>
+      </section>
+
+    </div>
+  </div>
+
+<script>
+/* HuecosApp - Single HTML SPA demo con cam.png y maps.png (ambos en misma carpeta) */
+const KEY = 'huecos_reportes_v1';
+function getReportes(){ return JSON.parse(localStorage.getItem(KEY) || '[]'); }
+function saveReportes(list){ localStorage.setItem(KEY, JSON.stringify(list)); }
+
+function clasificarRiesgo(desc){
+  if(!desc) return 'med';
+  const s = desc.toLowerCase();
+  if(s.includes('profund') || s.includes('pelig') || s.includes('grave') || s.includes('colaps') || s.includes('causa')) return 'high';
+  if(s.includes('peque') || s.includes('leve') || s.includes('superficial') || s.includes('bachecito') || s.includes('poco')) return 'low';
+  return 'med';
+}
+
+function coordsToPos(lat, lon, w=320, h=180){
+  if(!lat || !lon) return {x: Math.random()*w, y: Math.random()*h};
+  let la = parseFloat(lat), lo = parseFloat(lon);
+  if(Number.isNaN(la) || Number.isNaN(lo)) return {x: Math.random()*w, y: Math.random()*h};
+  let x = Math.abs((la * 10000) % 1) * w;
+  let y = Math.abs((lo * 10000) % 1) * h;
+  return {x,y};
+}
+
+document.addEventListener('DOMContentLoaded', ()=>{
+
+  // tabs SPA
+  const tabs = document.querySelectorAll('.tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', ()=> {
+      const target = tab.dataset.screen;
+      setActiveScreen(target);
+    });
+  });
+
+  document.getElementById('verMisReportes').addEventListener('click', (e)=>{
+    e.preventDefault(); setActiveScreen('mis');
+  });
+  document.getElementById('irReportar').addEventListener('click', (e)=>{
+    e.preventDefault(); setActiveScreen('reportar');
+  });
+
+  // preview imagen: si no hay foto usa cam.png (placeholder)
+  const fileInput = document.getElementById('foto');
+  const previewImg = document.getElementById('previewFoto');
+  // asegurar placeholder si la imagen no carga
+  if(!previewImg.src) previewImg.src = 'cam.png';
+  fileInput.addEventListener('change', (e)=>{
+    const f = e.target.files[0];
+    if(!f) { previewImg.src = 'cam.png'; return; }
+    const reader = new FileReader();
+    reader.onload = ()=> previewImg.src = reader.result;
+    reader.readAsDataURL(f);
+  });
+
+  // boton obtener ubicacion
+  const btnLoc = document.getElementById('btnUbicacion');
+  btnLoc.addEventListener('click', ()=>{
+    if(!navigator.geolocation){ alert('Geolocalización no disponible en este dispositivo'); return; }
+    btnLoc.disabled = true; btnLoc.textContent = 'Obteniendo…';
+    navigator.geolocation.getCurrentPosition((pos)=>{
+      const lat = pos.coords.latitude.toFixed(6);
+      const lon = pos.coords.longitude.toFixed(6);
+      document.getElementById('gps').innerText = `${lat}, ${lon}`;
+      btnLoc.disabled = false; btnLoc.textContent = '📍 Obtener Ubicación';
+    }, (err)=>{
+      alert('No se pudo obtener ubicación: '+err.message);
+      btnLoc.disabled = false; btnLoc.textContent = '📍 Obtener Ubicación';
+    }, {timeout:10000});
+  });
+
+  // enviar formulario
+  const form = document.getElementById('formReporte');
+  form.addEventListener('submit', async (ev)=>{
+    ev.preventDefault();
+    const desc = document.getElementById('descripcion').value.trim();
+    const gpsText = document.getElementById('gps').innerText || '';
+    let imgData = '';
+    const f = fileInput.files[0];
+    if(f){ imgData = await fileToDataURL(f); }
+    const [lat,lon] = (gpsText || '').split(',').map(s=>s?.trim());
+    const item = {
+      id: 'r_'+Date.now(),
+      descripcion: desc,
+      fecha: new Date().toLocaleString(),
+      gps: gpsText||'',
+      lat: lat||'',
+      lon: lon||'',
+      foto: imgData,
+      riesgo: clasificarRiesgo(desc),
+      fijo: false
+    };
+    const list = getReportes();
+    list.unshift(item);
+    saveReportes(list);
+    form.reset();
+    previewImg.src = 'cam.png';
+    document.getElementById('gps').innerText = '';
+    alert('Reporte guardado ✅');
+    setActiveScreen('mis');
+    renderAll();
+  });
+
+  // manejar clicks admin marcar arreglado/eliminar
+  document.body.addEventListener('click', (e)=>{
+    if(e.target.matches('.btn-fix')){
+      const id = e.target.dataset.id;
+      const list = getReportes();
+      const idx = list.findIndex(x=>x.id===id);
+      if(idx>=0){ list[idx].fijo = true; saveReportes(list); renderAll(); }
+    }
+    if(e.target.matches('.btn-delete')){
+      if(!confirm('Eliminar este reporte?')) return;
+      const id = e.target.dataset.id;
+      let list = getReportes();
+      list = list.filter(x=>x.id!==id);
+      saveReportes(list);
+      renderAll();
+    }
+  });
+
+  // initial render
+  renderAll();
+});
+
+// convierte File a dataURL
+function fileToDataURL(file){
+  return new Promise((res, rej)=>{
+    const r = new FileReader();
+    r.onload = ()=>res(r.result);
+    r.onerror = ()=>rej();
+    r.readAsDataURL(file);
+  });
+}
+
+function renderReportes(container, items, showAdminControls=false){
+  container.innerHTML = '';
+  if(!items || items.length===0){
+    container.innerHTML = '<div style="padding:14px;text-align:center;color:var(--muted)">No hay reportes aún</div>';
+    return;
+  }
+  const wrap = document.createElement('div'); wrap.className = 'report-list';
+  items.forEach(r=>{
+    const it = document.createElement('div'); it.className = 'report-item';
+    const thumb = document.createElement('img'); thumb.className = 'report-thumb';
+    // si no hay foto, mostrar cam.png como thumb
+    thumb.src = r.foto || 'cam.png';
+    thumb.alt = 'Foto reporte';
+    const meta = document.createElement('div'); meta.className = 'report-meta';
+    const date = document.createElement('div'); date.className = 'report-date'; date.textContent = r.fecha;
+    const desc = document.createElement('div'); desc.className = 'report-desc'; desc.textContent = r.descripcion || '(sin descripción)';
+    const gps = document.createElement('div'); gps.className = 'report-gps'; gps.innerHTML = `📍 ${r.gps || 'Sin GPS'}`;
+    const badge = document.createElement('span'); badge.className = 'badge ' + (r.riesgo==='high'?'high':(r.riesgo==='low'?'low':'med'));
+    badge.textContent = r.riesgo==='high'?'RIESGO ALTO':(r.riesgo==='low'?'RIESGO BAJO':'RIESGO MEDIO');
+    const extra = document.createElement('div'); extra.style.marginTop='8px'; extra.appendChild(badge);
+
+    meta.appendChild(date); meta.appendChild(desc); meta.appendChild(gps); meta.appendChild(extra);
+
+    it.appendChild(thumb); it.appendChild(meta);
+
+    if(showAdminControls){
+      const right = document.createElement('div');
+      right.style.display='flex'; right.style.flexDirection='column'; right.style.gap='8px'; right.style.marginLeft='8px';
+      const fix = document.createElement('button'); fix.className='btn-fix btn-main'; fix.style.padding='8px 10px'; fix.style.borderRadius='10px';
+      fix.textContent = r.fijo ? 'ARREGLADO' : 'Marcar arreglado';
+      fix.disabled = r.fijo; fix.dataset.id = r.id;
+      const del = document.createElement('button'); del.className='btn-delete'; del.style.padding='8px'; del.style.borderRadius='10px';
+      del.textContent = 'Eliminar'; del.dataset.id = r.id;
+      right.appendChild(fix); right.appendChild(del);
+      it.appendChild(right);
+    }
+
+    wrap.appendChild(it);
+  });
+  container.appendChild(wrap);
+}
+
+function renderMap(container, items){
+  container.innerHTML = '';
+  // el fondo real del mapa está en CSS (maps.png). Aquí solo posicionamos los puntos sobre ese fondo.
+  const mapBox = document.createElement('div'); mapBox.style.position='relative'; mapBox.style.width='100%'; mapBox.style.height='100%';
+  mapBox.className = 'map-inner';
+  container.appendChild(mapBox);
+  const w = container.clientWidth || 320, h = container.clientHeight || 200;
+  items.forEach(r=>{
+    const pos = coordsToPos(r.lat, r.lon, w, h);
+    const dot = document.createElement('div'); dot.className = 'map-dot ' + (r.riesgo||'med');
+    dot.style.left = pos.x + 'px';
+    dot.style.top = pos.y + 'px';
+    dot.title = `${(r.descripcion||'').slice(0,80)} — ${r.fecha}`;
+    mapBox.appendChild(dot);
+  });
+}
+
+function setActiveScreen(name){
+  document.querySelectorAll('.screen').forEach(s=> s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=> { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
+  const screen = document.getElementById(name);
+  if(screen) screen.classList.add('active');
+  const tab = document.querySelector('.tab[data-screen="'+name+'"]');
+  if(tab) { tab.classList.add('active'); tab.setAttribute('aria-selected','true'); }
+  renderAll();
+}
+
+function renderAll(){
+  const list = getReportes();
+  const listaCont = document.getElementById('listaReportes');
+  if(listaCont) renderReportes(listaCont, list, false);
+  const allCont = document.getElementById('todosReportes');
+  if(allCont) renderReportes(allCont, list, true);
+  const mapCont = document.getElementById('mapa');
+  if(mapCont) renderMap(mapCont, list);
+}
+</script>
+</body>
+</html>
